@@ -14,8 +14,8 @@ const Orbit = () => {
 const Box = (props) => {
   const ref = useRef();
   useFrame((state) => {
-    ref.current.rotation.x += 0.01;
     ref.current.rotation.y += 0.01;
+    ref.current.rotation.x += 0.01;
   });
   return (
     <mesh ref={ref} {...props} castShadow receiveShadow>
@@ -34,13 +34,12 @@ const Floor = (props) => {
   );
 };
 
-const Bulb = (props) => {
+const Sun = (props) => {
   return (
     <mesh {...props}>
       <pointLight castShadow />
       <sphereBufferGeometry args={[0.3]} />
-      {/* <meshPhysicalMaterial /> */}
-      <meshPhongMaterial emissive="red" />
+      <meshPhongMaterial emissive="yellow" />
     </mesh>
   );
 };
@@ -52,8 +51,9 @@ function App() {
         shadows
         style={{ background: "black" }}
         camera={{ position: [3, 3, 3] }}>
+        <fog attach="fog" args={["white", 1, 10]} />
         <Box position={[1, 1, 0]} />
-        <Bulb position={[0, 3, 0]} />
+        <Sun position={[0, 3, 0]} />
         <ambientLight intensity={0.2} />
         <axesHelper args={[5]} />
         <Orbit />
