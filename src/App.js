@@ -1,7 +1,13 @@
 import logo from "./logo.svg";
 import * as THREE from "three";
-import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
-import { useRef } from "react";
+import {
+  Canvas,
+  useFrame,
+  extend,
+  useThree,
+  useLoader
+} from "@react-three/fiber";
+import { Suspense, useRef } from "react";
 import "./App.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 extend({ OrbitControls });
@@ -11,16 +17,56 @@ const Orbit = () => {
   return <orbitControls args={[camera, gl.domElement]} />;
 };
 
+const BackGround = (props) => {
+  const texture = useLoader(THREE.TextureLoader, "/assets/back.jpg");
+
+  const { gl } = useThree();
+
+  const formatted = new THREE.WebGLCubeRenderTarget(
+    texture.image.height
+  ).fromEquirectangularTexture(gl, texture);
+
+  return <primitive attach="background" object={formatted.texture} />;
+};
+
 const Box = (props) => {
   const ref = useRef();
+  const texture = useLoader(THREE.TextureLoader, "/assets/wood.jpg");
   useFrame((state) => {
-    ref.current.rotation.y += 0.01;
     ref.current.rotation.x += 0.01;
+    ref.current.rotation.y += 0.01;
   });
+
+  const handlePointerDown = (e) => {
+    console.log(e);
+    e.object.active = true;
+  };
+
+  const handlePointerEnter = (e) => {
+    e.object.scale.x = 1.5;
+    e.object.scale.y = 1.5;
+    e.object.scale.z = 1.5;
+  };
+
+  const handlePointerLeave = (e) => {
+    if (!e.object.active) {
+      e.object.scale.x = 1;
+      e.object.scale.y = 1;
+      e.object.scale.z = 1;
+    }
+    console.log(e.object);
+  };
+
   return (
-    <mesh ref={ref} {...props} castShadow receiveShadow>
+    <mesh
+      ref={ref}
+      {...props}
+      castShadow
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onPointerDown={handlePointerDown}>
       <boxBufferGeometry />
-      <meshPhysicalMaterial color="blue" />
+      <meshPhysicalMaterial map={texture} />
     </mesh>
   );
 };
@@ -51,8 +97,12 @@ function App() {
         shadows
         style={{ background: "black" }}
         camera={{ position: [3, 3, 3] }}>
-        <fog attach="fog" args={["white", 1, 10]} />
-        <Box position={[1, 1, 0]} />
+        <Suspense fallback={null}>
+          <Box position={[0, 1, 0]} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <BackGround />
+        </Suspense>
         <Sun position={[0, 3, 0]} />
         <ambientLight intensity={0.2} />
         <axesHelper args={[5]} />
