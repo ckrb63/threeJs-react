@@ -8,8 +8,9 @@ import {
   useLoader
 } from "@react-three/fiber";
 import { Suspense, useRef } from "react";
-import "./App.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Model from "./components/Model";
+import Dragable from "./components/Dragable";
 extend({ OrbitControls });
 
 const Orbit = () => {
@@ -38,7 +39,6 @@ const Box = (props) => {
   });
 
   const handlePointerDown = (e) => {
-    console.log(e);
     e.object.active = true;
   };
 
@@ -54,7 +54,6 @@ const Box = (props) => {
       e.object.scale.y = 1;
       e.object.scale.z = 1;
     }
-    console.log(e.object);
   };
 
   return (
@@ -97,16 +96,21 @@ function App() {
         shadows
         style={{ background: "black" }}
         camera={{ position: [3, 3, 3] }}>
+        <Dragable>
+          <Suspense fallback={null}>
+            <Box position={[0, 1, 0]} />
+          </Suspense>
         <Suspense fallback={null}>
-          <Box position={[0, 1, 0]} />
+          <Model path='/assets/TempRoomColor.gltf' />
         </Suspense>
+        </Dragable>
         <Suspense fallback={null}>
           <BackGround />
         </Suspense>
         <Sun position={[0, 3, 0]} />
         <ambientLight intensity={0.2} />
         <axesHelper args={[5]} />
-        <Orbit />
+        {/* <Orbit /> */}
         <Floor position={[0, -0.5, 0]} />
       </Canvas>
     </div>
